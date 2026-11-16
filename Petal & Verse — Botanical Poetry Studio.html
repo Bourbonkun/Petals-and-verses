@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petal &amp; Verse — Botanical Poetry Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cormorant Garamond, Lora & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', '"Lora"', 'Georgia', 'serif'],
+                        body: ['"Lora"', 'Georgia', 'serif'],
+                        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ==========================================================================
+           DESIGN TOKENS & DUAL THEME PALETTES
+           ========================================================================== */
+        :root {
+            /* Theme 1: Toffee Rose (Warm Antique Parchment & Vintage Caramel) */
+            --bg-canvas: #FAF5EE;
+            --bg-paper: #FFFDF9;
+            --bg-sidebar: #F3EAE0;
+            --bg-elevated: #EFE3D4;
+            --bg-hover: #E6D5C3;
+            --text-primary: #2D1E17;
+            --text-secondary: #6E5447;
+            --text-muted: #9A7F71;
+            --accent-primary: #9E5A4C;     /* Dusty Toffee Rose */
+            --accent-secondary: #B87D56;   /* Warm Caramel */
+            --accent-soft: rgba(158, 90, 76, 0.12);
+            --border-subtle: rgba(110, 84, 71, 0.18);
+            --border-strong: rgba(110, 84, 71, 0.32);
+            --shadow-paper: 0 20px 50px -15px rgba(45, 30, 23, 0.08), 0 4px 16px -4px rgba(45, 30, 23, 0.04);
+            --paper-grain-opacity: 0.35;
+        }
+
+        [data-theme="cocoa-cosmos"] {
+            /* Theme 2: Cocoa Cosmos (Velvety Chocolate-Maroon & Twilight Dusk) */
+            --bg-canvas: #171012;
+            --bg-paper: #1F1518;
+            --bg-sidebar: #140D0F;
+            --bg-elevated: #2A1C20;
+            --bg-hover: #362429;
+            --text-primary: #F4EAE1;
+            --text-secondary: #C5AFA6;
+            --text-muted: #8A716A;
+            --accent-primary: #D9A760;     /* Vanilla Gold Pollen */
+            --accent-secondary: #A6535A;   /* Velvety Cosmos Maroon */
+            --accent-soft: rgba(217, 167, 96, 0.14);
+            --border-subtle: rgba(244, 234, 225, 0.11);
+            --border-strong: rgba(244, 234, 225, 0.22);
+            --shadow-paper: 0 24px 60px -15px rgba(0, 0, 0, 0.55), 0 4px 20px -4px rgba(0, 0, 0, 0.35);
+            --paper-grain-opacity: 0.18;
+        }
+
+        /* Smooth Theme Transitions */
+        body, .theme-transition, textarea, input, button, aside, header {
+            transition: background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Tactile Paper Texture Overlay */
+        .paper-texture {
+            background-color: var(--bg-paper);
+            box-shadow: var(--shadow-paper);
+            position: relative;
+        }
+
+        .paper-texture::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: inherit;
+            opacity: var(--paper-grain-opacity);
+            background-image: radial-gradient(var(--text-muted) 0.45px, transparent 0.45px);
+            background-size: 18px 18px;
+        }
+
+        /* Synchronized Editor & Syllable Gutter Styling */
+        .poem-editor-font {
+            font-family: 'Lora', 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.125rem;
+            line-height: 2.1rem;
+            letter-spacing: 0.01em;
+        }
+
+        @media (min-width: 640px) {
+            .poem-editor-font {
+                font-size: 1.225rem;
+                line-height: 2.25rem;
+            }
+        }
+
+        #poemTextarea {
+            background: transparent;
+            color: var(--text-primary);
+            resize: none;
+            outline: none;
+            caret-color: var(--accent-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #poemTextarea::placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            opacity: 0.75;
+        }
+
+        /* Custom Elegant Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Toast Notification Animation */
+        @keyframes floatUpFade {
+            0% { opacity: 0; transform: translate(-50%, 12px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -8px); }
+        }
+        .toast-animate {
+            animation: floatUpFade 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* Botanical Corner Watermark */
+        .botanical-watermark {
+            color: var(--accent-primary);
+            opacity: 0.14;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-[#9E5A4C]/20">
+
+    <!-- ======================================================================
+         TOP NAVIGATION BAR
+         ====================================================================== -->
+    <header style="background-color: var(--bg-canvas); border-color: var(--border-subtle);" 
+            class="sticky top-0 z-30 border-b backdrop-blur-md bg-opacity-90 px-4 sm:px-6 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            
+            <!-- Brand & Botanical Emblem -->
+            <div class="flex items-center gap-3">
+                <div style="background-color: var(--accent-soft); color: var(--accent-primary);" 
+                     class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
+                    <!-- Custom Botanical Toffee Rose / Cosmos SVG Icon -->
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3c-2.5 2.5-2.5 6.5 0 9 2.5-2.5 2.5-6.5 0-9z"/>
+                        <path d="M12 12c-3.5-1.5-7.5 0-8.5 3.5 3.5 1.5 7.5 0 8.5-3.5z"/>
+                        <path d="M12 12c3.5-1.5 7.5 0 8.5 3.5-3.5 1.5-7.5 0-8.5-3.5z"/>
+                        <path d="M12 12v9"/>
+                        <path d="M12 17c-2 0-3.5-1-4-2.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-serif text-xl sm:text-2xl font-semibold tracking-tight leading-none" style="color: var(--text-primary);">
+                        Petal &amp; Verse
+                    </h1>
+                    <p id="themeSubtitle" class="text-[11px] tracking-widest uppercase mt-0.5 font-medium" style="color: var(--text-muted);">
+                        Toffee Rose Edition
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Controls: Theme Switcher, Actions & Mobile Drawer Toggles -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                
+                <!-- Dual Botanical Theme Toggle -->
+                <div style="background-color: var(--bg-sidebar); border-color: var(--border-subtle);" 
+                     class="flex items-center p-1 rounded-full border" role="group" aria-label="Theme Switcher">
+                    <button id="btnThemeToffee" onclick="setTheme('toffee-rose')"
+                            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer"
+                            title="Switch to Toffee Rose (Warm Parchment)">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#9E5A4C] border border-[#2D1E17]/20"></span>
+                        <span class="hidden md:inline">Toffee Rose</span>
+                    </button>
+                    <button id="btnThemeCocoa" onclick="setTheme('cocoa-cosmos')"
+                            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer"
+                            title="Switch to Cocoa Cosmos (Velvet Dusk)">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#D9A760] border border-[#F4EAE1]/20"></span>
+                        <span class="hidden md:inline">Cocoa Cosmos</span>
+                    </button>
+                </div>
+
+                <!-- Keepsake Card Preview Button -->
+                <button onclick="openPreviewModal()"
+                        style="background-color: var(--bg-elevated); color: var(--text-primary); border-color: var(--border-subtle);"
+                        class="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium hover:opacity-90 active:scale-95 transition cursor-pointer"
+                        title="Preview as Pressed-Flower Keepsake Card">
+                    <svg class="w-4 h-4" style="color: var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="3" width="18" height="18" rx="3"/>
+                        <path d="M7 8h10M7 12h7M7 16h9"/>
+                    </svg>
+                    <span class="hidden sm:inline">Keepsake Card</span>
+                </button>
+
+                <!-- Save Poem Button -->
+                <button onclick="saveCurrentPoem(true)"
+                        style="background-color: var(--accent-primary); color: #FFFDF9;"
+                        class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium shadow-sm hover:opacity-95 active:scale-95 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    <span>Save</span>
+                </button>
+
+                <!-- Mobile Studio Drawer Toggle -->
+                <button onclick="toggleMobileDrawer()"
+                        style="background-color: var(--bg-sidebar); border-color: var(--border-subtle); color: var(--text-primary);"
+                        class="lg:hidden p-2 rounded-xl border active:scale-95 transition cursor-pointer"
+                        aria-label="Open Muse & Notebook">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 6h16M4 12h16M4 18h10"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ======================================================================
+         MAIN WORKSPACE (POETRY CANVAS + STUDIO SIDEBAR)
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+        <!-- LEFT / CENTER: DISTRACTION-FREE POETRY CANVAS (7 cols on desktop) -->
+        <section class="lg:col-span-7 xl:col-span-8 flex flex-col">
+            
+            <!-- Manuscript Sheet -->
+            <div style="border-color: var(--border-subtle);" class="paper-texture rounded-2xl border p-6 sm:p-10 md:p-12 min-h-[68vh] flex flex-col justify-between relative overflow-hidden">
+                
+                <!-- Decorative Corner Botanical Flourish (Top Right) -->
+                <svg class="botanical-watermark absolute -top-4 -right-4 w-44 h-44" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <path d="M180 20 C140 40, 110 80, 95 145" />
+                    <path d="M148 48 C125 35, 105 45, 102 65 C120 68, 138 60, 148 48 Z" />
+                    <path d="M128 78 C150 75, 165 90, 160 110 C142 106, 130 95, 128 78 Z" />
+                    <path d="M112 108 C88 98, 70 110, 72 130 C90 130, 105 120, 112 108 Z" />
+                    <circle cx="182" cy="18" r="6" />
+                </svg>
+
+                <div>
+                    <!-- Top Metadata Strip inside Sheet -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-6 border-b" style="border-color: var(--border-subtle);">
+                        <div class="flex items-center gap-2">
+                            <span id="saveStatusDot" class="w-2 h-2 rounded-full bg-emerald-500/80"></span>
+                            <span id="saveStatusText" class="text-xs font-medium" style="color: var(--text-muted);">Saved in notebook</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="createNewPoem()"
+                                    style="color: var(--text-secondary);"
+                                    class="text-xs px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-1 cursor-pointer"
+                                    title="Start a blank page">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                New Page
+                            </button>
+                            <button onclick="copyPoemToClipboard()"
+                                    style="color: var(--text-secondary);"
+                                    class="text-xs px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-1 cursor-pointer"
+                                    title="Copy poem to clipboard">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                                Copy
+                            </button>
+                            <button onclick="downloadPoemTxt()"
+                                    style="color: var(--text-secondary);"
+                                    class="text-xs px-2.5 py-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-1 cursor-pointer"
+                                    title="Download as .txt file">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                .TXT
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Poem Title Input -->
+                    <input type="text" 
+                           id="poemTitle" 
+                           placeholder="Untitled Verse..." 
+                           autocomplete="off"
+                           style="color: var(--text-primary); caret-color: var(--accent-primary);"
+                           class="w-full bg-transparent font-serif text-3xl sm:text-4xl font-semibold tracking-tight outline-none mb-2 placeholder:italic placeholder:opacity-50" />
+
+                    <!-- Optional Subtle Epigraph / Botanical Tagline -->
+                    <div class="flex items-center gap-2 mb-6">
+                        <span id="activeBotanicalBadge" style="color: var(--accent-primary);" class="text-xs italic font-serif tracking-wide">
+                            ~ pressed between pages of time
+                        </span>
+                    </div>
+
+                    <!-- Stanza Editor with Synchronized Per-Line Syllable Gutter -->
+                    <div class="relative flex items-start gap-3 sm:gap-4">
+                        <!-- Syllable Count Column (Mirrors wrapped lines accurately) -->
+                        <div id="syllableGutter" 
+                             aria-hidden="true"
+                             style="color: var(--text-muted); border-color: var(--border-subtle);"
+                             class="select-none text-right pr-2.5 sm:pr-3 border-r font-sans text-[11px] shrink-0 pt-0.5 min-w-[2.25rem]">
+                            <!-- Dynamically populated line syllable counts -->
+                        </div>
+
+                        <!-- Main Poem Textarea -->
+                        <div class="relative flex-1 min-w-0">
+                            <textarea id="poemTextarea"
+                                      rows="14"
+                                      spellcheck="true"
+                                      placeholder="Begin with a quiet image, a brown petal in dusk, or tap the Muse for an opening spark..."
+                                      class="w-full poem-editor-font block overflow-hidden"></textarea>
+                            
+                            <!-- Hidden Mirror Div for Exact Line-Wrapping Measurement -->
+                            <div id="mirrorMeasurer" 
+                                 aria-hidden="true"
+                                 class="poem-editor-font invisible absolute top-0 left-0 right-0 pointer-events-none -z-10 whitespace-pre-wrap break-words"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Live Meter & Rhythm Bar -->
+                <div style="border-color: var(--border-subtle); color: var(--text-secondary);" 
+                     class="mt-10 pt-4 border-t flex flex-wrap items-center justify-between gap-4 text-xs">
+                    
+                    <div class="flex items-center gap-4 sm:gap-6">
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="statLines" class="font-serif text-lg font-semibold" style="color: var(--text-primary);">0</span>
+                            <span style="color: var(--text-muted);">Lines</span>
+                        </div>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="statStanzas" class="font-serif text-lg font-semibold" style="color: var(--text-primary);">0</span>
+                            <span style="color: var(--text-muted);">Stanzas</span>
+                        </div>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="statWords" class="font-serif text-lg font-semibold" style="color: var(--text-primary);">0</span>
+                            <span style="color: var(--text-muted);">Words</span>
+                        </div>
+                        <div class="flex items-baseline gap-1.5">
+                            <span id="statSyllables" class="font-serif text-lg font-semibold" style="color: var(--accent-primary);">0</span>
+                            <span style="color: var(--text-muted);">Total Syllables</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-[11px]" style="color: var(--text-muted);">
+                        <span class="inline-block w-1.5 h-1.5 rounded-full" style="background-color: var(--accent-primary);"></span>
+                        <span>Syllables shown left of each line</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: STUDIO COMPANION SIDEBAR (Desktop Fixed / Mobile Slide-Over Drawer) -->
+        <div id="drawerBackdrop" onclick="toggleMobileDrawer()" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 hidden lg:hidden transition-opacity"></div>
+        
+        <aside id="studioSidebar"
+               style="background-color: var(--bg-sidebar); border-color: var(--border-subtle);"
+               class="fixed inset-y-0 right-0 z-50 w-[88vw] max-w-md lg:static lg:w-auto lg:max-w-none lg:col-span-5 xl:col-span-4 border-l lg:border rounded-none lg:rounded-2xl flex flex-col h-full lg:h-auto lg:sticky lg:top-20 transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-out shadow-2xl lg:shadow-none">
+            
+            <!-- Mobile Drawer Header -->
+            <div style="border-color: var(--border-subtle);" class="flex items-center justify-between px-5 py-4 border-b lg:hidden">
+                <span class="font-serif text-lg font-semibold" style="color: var(--text-primary);">Poet's Studio</span>
+                <button onclick="toggleMobileDrawer()" style="color: var(--text-secondary);" class="p-1.5 rounded-lg hover:bg-black/5">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Studio Tab Navigation (Muse / Rhyme & Rhythm / Notebook) -->
+            <div style="border-color: var(--border-subtle);" class="grid grid-cols-3 p-2 border-b gap-1">
+                <button id="tabBtnMuse" onclick="switchStudioTab('muse')"
+                        class="studio-tab-btn py-2 px-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    <span>Muse</span>
+                </button>
+                <button id="tabBtnRhyme" onclick="switchStudioTab('rhyme')"
+                        class="studio-tab-btn py-2 px-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    <span>Rhyme</span>
+                </button>
+                <button id="tabBtnNotebook" onclick="switchStudioTab('notebook')"
+                        class="studio-tab-btn py-2 px-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <span>Notebook</span>
+                    <span id="notebookCountBadge" style="background-color: var(--accent-soft); color: var(--accent-primary);" class="px-1.5 py-0.2 rounded-full text-[10px]">1</span>
+                </button>
+            </div>
+
+            <!-- TAB 1: BOTANICAL MUSE & OPENING LINE SPARK -->
+            <div id="panelMuse" class="p-5 overflow-y-auto flex-1 space-y-5 max-h-[calc(100vh-11rem)]">
+                
+                <!-- Botanical Specimen Selector -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[11px] font-semibold uppercase tracking-wider" style="color: var(--text-muted);">
+                            Botanical Specimen
+                        </label>
+                        <button onclick="shuffleMuse()" style="color: var(--accent-primary);" class="text-xs font-medium flex items-center gap-1 hover:underline cursor-pointer">
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="16 3 21 3 21 8"/>
+                                <line x1="4" y1="20" x2="21" y2="3"/>
+                                <polyline points="21 16 21 21 16 21"/>
+                                <line x1="15" y1="15" x2="21" y2="21"/>
+                                <line x1="4" y1="4" x2="9" y2="9"/>
+                            </svg>
+                            Shuffle Spark
+                        </button>
+                    </div>
+                    <div id="botanicalPills" class="flex flex-wrap gap-1.5">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Selected Flower Card -->
+                <div style="background-color: var(--bg-paper); border-color: var(--border-subtle);" class="p-4 rounded-xl border space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <h3 id="museFlowerName" class="font-serif text-xl font-semibold" style="color: var(--text-primary);">Toffee Rose</h3>
+                        <span id="museFlowerColorDot" class="w-3.5 h-3.5 rounded-full shadow-inner"></span>
+                    </div>
+                    <p id="museFlowerLore" class="text-xs leading-relaxed" style="color: var(--text-secondary);">
+                        Caramel-hued petals with ruffled antique edges; evokes nostalgia, dried letters, and quiet devotion.
+                    </p>
+                </div>
+
+                <!-- Opening Line Sparks (Click to Insert) -->
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Opening Line Sparks <span class="font-normal lowercase">(tap to weave in)</span>
+                    </p>
+                    <div id="openingLinesList" class="space-y-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Sensory Imagery Word Chips -->
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Sensory Palette <span class="font-normal lowercase">(tap to insert word)</span>
+                    </p>
+                    <div id="sensoryWordsList" class="flex flex-wrap gap-1.5">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Poetic Prompt Card -->
+                <div style="background-color: var(--accent-soft); border-color: var(--border-subtle);" class="p-4 rounded-xl border">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest mb-1" style="color: var(--accent-primary);">Stanza Prompt</p>
+                    <p id="musePromptText" class="font-serif italic text-base leading-snug" style="color: var(--text-primary);">
+                        Write about an object kept in a cedar box that still holds the scent of another season.
+                    </p>
+                </div>
+            </div>
+
+            <!-- TAB 2: RHYME & RHYTHM HELPER -->
+            <div id="panelRhyme" class="p-5 overflow-y-auto flex-1 space-y-4 hidden max-h-[calc(100vh-11rem)]">
+                <div>
+                    <label for="rhymeInput" class="block text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Rhyme &amp; Resonance Lookup
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="rhymeInput" 
+                               placeholder="Type a word (e.g. rose, dusk, gold, shadow)..." 
+                               autocomplete="off"
+                               style="background-color: var(--bg-paper); color: var(--text-primary); border-color: var(--border-strong);"
+                               class="w-full pl-3.5 pr-9 py-2.5 rounded-xl border text-sm outline-none focus:ring-2 focus:ring-[#9E5A4C]/30" />
+                        <button onclick="clearRhymeSearch()" id="btnClearRhyme" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-xs p-1" style="color: var(--text-muted);">
+                            ✕
+                        </button>
+                    </div>
+                    <!-- Quick Word Suggestions -->
+                    <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span class="text-[11px]" style="color: var(--text-muted);">Try:</span>
+                        <button onclick="lookupRhymeWord('rose')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">rose</button>
+                        <button onclick="lookupRhymeWord('dusk')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">dusk</button>
+                        <button onclick="lookupRhymeWord('gold')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">gold</button>
+                        <button onclick="lookupRhymeWord('rain')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">rain</button>
+                        <button onclick="lookupRhymeWord('bloom')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">bloom</button>
+                        <button onclick="lookupRhymeWord('memory')" class="text-[11px] underline cursor-pointer" style="color: var(--accent-primary);">memory</button>
+                    </div>
+                </div>
+
+                <!-- Syllable Breakdown of Queried Word -->
+                <div id="rhymeWordAnalysis" style="background-color: var(--bg-paper); border-color: var(--border-subtle);" class="p-3.5 rounded-xl border flex items-center justify-between">
+                    <div>
+                        <span id="analyzedWordDisplay" class="font-serif text-xl font-semibold" style="color: var(--text-primary);">rose</span>
+                        <span id="analyzedSyllableBreak" class="text-xs ml-2 italic" style="color: var(--text-muted);">1 syllable</span>
+                    </div>
+                    <button onclick="insertWordAtCursor(document.getElementById('analyzedWordDisplay').textContent)"
+                            style="background-color: var(--accent-soft); color: var(--accent-primary);"
+                            class="text-xs px-2.5 py-1 rounded-lg font-medium hover:opacity-85 cursor-pointer">
+                        + Insert
+                    </button>
+                </div>
+
+                <!-- Perfect Rhymes -->
+                <div>
+                    <h4 class="text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Perfect Rhymes <span class="font-normal lowercase">(tap to insert)</span>
+                    </h4>
+                    <div id="perfectRhymesList" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Slant / Near Rhymes -->
+                <div>
+                    <h4 class="text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Slant &amp; Soft Rhymes
+                    </h4>
+                    <div id="slantRhymesList" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Poetic Synonyms & Imagery Echoes -->
+                <div>
+                    <h4 class="text-[11px] font-semibold uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+                        Poetic Echoes &amp; Synonyms
+                    </h4>
+                    <div id="poeticSynonymsList" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: SAVED POEMS NOTEBOOK -->
+            <div id="panelNotebook" class="p-5 overflow-y-auto flex-1 space-y-3 hidden max-h-[calc(100vh-11rem)]">
+                <div class="flex items-center justify-between mb-1">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider" style="color: var(--text-muted);">
+                        Pressed Drafts
+                    </p>
+                    <button onclick="createNewPoem()" style="color: var(--accent-primary);" class="text-xs font-medium hover:underline cursor-pointer">
+                        + New Draft
+                    </button>
+                </div>
+                <div id="savedPoemsList" class="space-y-2.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- ======================================================================
+         PRESSED-FLOWER KEEPSAKE CARD MODAL
+         ====================================================================== -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/65 backdrop-blur-sm">
+        <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl animate-fadeIn"
+             style="background-color: var(--bg-paper); border: 1px solid var(--border-strong);">
+            
+            <!-- Modal Top Controls -->
+            <div style="border-color: var(--border-subtle);" class="flex items-center justify-between px-6 py-4 border-b">
+                <span class="text-xs font-semibold uppercase tracking-widest" style="color: var(--text-muted);">
+                    Keepsake Card Preview
+                </span>
+                <div class="flex items-center gap-2">
+                    <button onclick="copyPoemToClipboard()"
+                            style="background-color: var(--accent-soft); color: var(--accent-primary);"
+                            class="px-3 py-1.5 rounded-lg text-xs font-medium hover:opacity-85 transition cursor-pointer">
+                        Copy Text
+                    </button>
+                    <button onclick="closePreviewModal()"
+                            style="color: var(--text-secondary);"
+                            class="p-1.5 rounded-lg hover:bg-black/5 transition cursor-pointer" aria-label="Close modal">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Framed Pressed-Flower Card Content -->
+            <div class="p-6 sm:p-10">
+                <div style="border-color: var(--border-strong);" class="border rounded-xl p-6 sm:p-10 relative overflow-hidden">
+                    
+                    <!-- Delicate Pressed Botanical Illustration in Card Corner -->
+                    <svg class="w-24 h-24 absolute -bottom-2 -right-2 opacity-20 pointer-events-none" style="color: var(--accent-primary);" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.3">
+                        <path d="M95 105 C75 80, 60 55, 45 20" />
+                        <path d="M68 65 C50 62, 38 72, 42 86 C55 86, 65 78, 68 65 Z" />
+                        <path d="M58 45 C72 40, 84 48, 82 62 C70 60, 60 54, 58 45 Z" />
+                        <circle cx="43" cy="18" r="8" />
+                        <circle cx="43" cy="18" r="3" />
+                    </svg>
+
+                    <p id="cardEditionLabel" class="text-[10px] uppercase tracking-[0.22em] mb-4" style="color: var(--accent-primary);">
+                        Toffee Rose Press
+                    </p>
+                    
+                    <h2 id="cardPoemTitle" class="font-serif text-2xl sm:text-3xl font-semibold mb-6" style="color: var(--text-primary);">
+                        Untitled Verse
+                    </h2>
+
+                    <div id="cardPoemBody" class="font-body text-base sm:text-lg leading-relaxed whitespace-pre-wrap" style="color: var(--text-primary);">
+                    </div>
+
+                    <div style="border-color: var(--border-subtle); color: var(--text-muted);" class="mt-8 pt-4 border-t flex items-center justify-between text-[11px] font-serif italic">
+                        <span id="cardDateStamp">Autumn Leaf</span>
+                        <span id="cardMetricsStamp">0 lines · 0 syllables</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 left-1/2 z-50 pointer-events-none"></div>
+
+    <!-- ======================================================================
+         APPLICATION LOGIC (SYLLABLE COUNTER, RHYME ENGINE, MUSE & STORAGE)
+         ====================================================================== -->
+    <script>
+        /* ----------------------------------------------------------------------
+           1. CURATED BOTANICAL MUSE DATA
+           ---------------------------------------------------------------------- */
+        const BOTANICAL_SPECIMENS = [
+            {
+                id: 'toffee-rose',
+                name: 'Toffee Rose',
+                color: '#9E5A4C',
+                tagline: '~ warm caramel petals pressed in linen',
+                lore: 'Caramel-hued petals with ruffled antique edges; evokes nostalgia, dried letters, sepia afternoons, and quiet devotion.',
+                openings: [
+                    'Like a Toffee Rose pressed between forgotten pages,',
+                    'You arrived in shades of caramel and late October,',
+                    'Even dried, the Toffee Rose remembers the rain,',
+                    'We folded our promises into antique parchment,'
+                ],
+                sensory: ['caramel', 'vellum', 'sepia', 'ruffled', 'steeped', 'amber', 'linen', 'heirloom', 'cinnamon', 'patina'],
+                prompts: [
+                    'Write a stanza about a letter you never sent, sealed with dried petals.',
+                    'Describe the color of late afternoon light falling across old wood and tea.',
+                    'Compare a lasting memory to a flower that grows lovelier as it dries.'
+                ]
+            },
+            {
+                id: 'cocoa-cosmos',
+                name: 'Cocoa Cosmos',
+                color: '#6B2D38',
+                tagline: '~ velvety maroon & vanilla dusk',
+                lore: 'Deep chocolate-maroon blooms that release a subtle scent of vanilla and cocoa at twilight; poetic, rare, and melancholic.',
+                openings: [
+                    'You lingered like a Cocoa Cosmos in the dusk,',
+                    'Velvet-dark and faintly sweet as evening vanilla,',
+                    'Where twilight settles into chocolate-maroon petals,',
+                    'Night opens softly, smelling of rain and cocoa,'
+                ],
+                sensory: ['velvet', 'twilight', 'vanilla', 'cocoa', 'maroon', 'dusk', 'nocturne', 'pollen', 'hush', 'obsidian'],
+                prompts: [
+                    'Capture the exact minute when sunset turns into deep indigo and shadows soften.',
+                    'Write about a secret scent that brings back an entire summer night.',
+                    'Describe something dark and quiet that holds a hidden golden center.'
+                ]
+            },
+            {
+                id: 'teddy-sunflower',
+                name: 'Teddy Bear Sunflower',
+                color: '#C68B3F',
+                tagline: '~ golden-brown warmth & childhood wool',
+                lore: 'Fluffy, densely petaled blooms in toasted golden-brown; radiates hearth warmth, comfort, and tender innocence.',
+                openings: [
+                    'Soft as a Teddy Bear Sunflower on the porch step,',
+                    'You carry the warmth of wool and toasted honey,',
+                    'No sharp edges—only golden-brown afternoon,',
+                    'In the garden of small mercies, something plush blooms,'
+                ],
+                sensory: ['honeyed', 'hearth', 'golden', 'flannel', 'toasted', 'meadow', 'ochre', 'sunlit', 'woven', 'gentle'],
+                prompts: [
+                    'Write about a place or person that feels like coming indoors out of the cold.',
+                    'Use the texture of wool, warm bread, or plush petals as your central metaphor.'
+                ]
+            },
+            {
+                id: 'hazel-orchid',
+                name: 'Hazel Orchid',
+                color: '#8C6D53',
+                tagline: '~ speckled earth & quiet poise',
+                lore: 'Earthy, speckled brown and fawn tones; delicate, unhurried, and rare—thriving in dappled forest shade.',
+                openings: [
+                    'A Hazel Orchid suspended in the moss-lit quiet,',
+                    'Freckled like river stones beneath clear water,',
+                    'Patience looks like speckled brown petals opening,',
+                    'Not every bloom asks for the noon sun,'
+                ],
+                sensory: ['speckled', 'moss', 'cedar', 'dappled', 'fawn', 'porcelain', 'fern', 'mist', 'delicate', 'stillness'],
+                prompts: [
+                    'Write an ode to quiet resilience and thriving in the shade.',
+                    'Describe tiny details—freckles, leaf veins, or water droplets—up close.'
+                ]
+            },
+            {
+                id: 'bronze-mum',
+                name: 'Bronze Mum',
+                color: '#A35233',
+                tagline: '~ russet leaves & turning seasons',
+                lore: 'Warm russet and burnished copper chrysanthemums; emblems of autumn threshold, hearth smoke, and graceful change.',
+                openings: [
+                    'Burnished as a Bronze Mum against the frost,',
+                    'The season turns in spirals of copper and russet,',
+                    'Smoke curls above the orchard where bronze blooms nod,',
+                    'Let the year fall away in warm, unhurried layers,'
+                ],
+                sensory: ['russet', 'copper', 'ember', 'orchard', 'crisp', 'chestnut', 'bonfire', 'harvest', 'burnished', 'cedar'],
+                prompts: [
+                    'Write about letting go of one season to welcome the next without grief.',
+                    'Use imagery of copper, falling leaves, and crisp evening air.'
+                ]
+            }
+        ];
+
+        /* ----------------------------------------------------------------------
+           2. OFFLINE POETIC RHYME & THESAURUS LEXICON
+           ---------------------------------------------------------------------- */
+        const POETIC_LEXICON = {
+            'rose': {
+                perfect: ['close', 'prose', 'goes', 'flows', 'glows', 'repose', 'compose', 'enclose', 'suppose', 'those'],
+                slant: ['soft', 'lost', 'moss', 'cross', 'ghost', 'gold', 'cold', 'hold', 'fold'],
+                synonyms: ['petal', 'bloom', 'blossom', 'briar', 'corolla', 'bud', 'garland', 'floret']
+            },
+            'dusk': {
+                perfect: ['musk', 'husk', 'tusk', 'brusk'],
+                slant: ['rust', 'dust', 'trust', 'must', 'hush', 'blush', 'rush', 'crush', 'lush'],
+                synonyms: ['twilight', 'gloaming', 'eventide', 'nightfall', 'vespers', 'shadow', 'sundown']
+            },
+            'gold': {
+                perfect: ['old', 'hold', 'fold', 'cold', 'told', 'bold', 'unfold', 'behold', 'retold', 'scold'],
+                slant: ['glow', 'slow', 'soul', 'roll', 'toll', 'rose', 'stone', 'alone'],
+                synonyms: ['amber', 'ochre', 'honey', 'gilded', 'saffron', 'auric', 'sunlit', 'topaz']
+            },
+            'rain': {
+                perfect: ['pain', 'vain', 'remain', 'stain', 'grain', 'lane', 'windowpane', 'refrain', 'attain', 'chain'],
+                slant: ['wind', 'gray', 'stay', 'sway', 'vein', 'faint', 'paint', 'saint'],
+                synonyms: ['drizzle', 'mist', 'downpour', 'deluge', 'monsoon', 'dew', 'shower', 'tears']
+            },
+            'bloom': {
+                perfect: ['room', 'gloom', 'loom', 'plume', 'perfume', 'assume', 'consume', 'resume', 'tomb', 'womb'],
+                slant: ['moon', 'soon', 'tune', 'june', 'noon', 'poem', 'home', 'roam'],
+                synonyms: ['blossom', 'flower', 'flourish', 'unfold', 'petal', 'bud', 'effloresce']
+            },
+            'memory': {
+                perfect: ['reverie', 'melody', 'elegy', 'tapestry', 'symphony', 'century', 'mystery', 'history'],
+                slant: ['sea', 'tree', 'free', 'leaves', 'breeze', 'ease', 'keepsake', 'ember'],
+                synonyms: ['remembrance', 'nostalgia', 'echo', 'relic', 'keepsake', 'trace', 'afterimage']
+            },
+            'night': {
+                perfect: ['light', 'sight', 'flight', 'bright', 'quiet', 'delight', 'twilight', 'moonlight', 'starlight', 'write'],
+                slant: ['time', 'rhyme', 'chime', 'line', 'pine', 'silence', 'still'],
+                synonyms: ['nocturne', 'midnight', 'darkness', 'obscurity', 'velvet', 'starfall', 'slumber']
+            },
+            'heart': {
+                perfect: ['part', 'start', 'art', 'apart', 'depart', 'impart', 'chart'],
+                slant: ['earth', 'hearth', 'dark', 'spark', 'lark', 'mark', 'warmth'],
+                synonyms: ['core', 'pulse', 'spirit', 'breast', 'marrow', 'center', 'devotion']
+            },
+            'time': {
+                perfect: ['rhyme', 'chime', 'climb', 'sublime', 'prime', 'mime'],
+                slant: ['line', 'vine', 'wine', 'shine', 'mine', 'fine', 'wind', 'mind'],
+                synonyms: ['eternity', 'season', 'hour', 'passage', 'tide', 'epoch', 'moment']
+            },
+            'brown': {
+                perfect: ['down', 'town', 'crown', 'drown', 'gown', 'renown'],
+                slant: ['ground', 'sound', 'found', 'round', 'bound', 'around', 'earth'],
+                synonyms: ['umber', 'sepia', 'russet', 'chestnut', 'caramel', 'cocoa', 'sienna', 'hazel']
+            }
+        };
+
+        // Extended phonetic word pool for algorithmic rhyme matching on any word
+        const PHONETIC_WORD_BANK = [
+            'ache', 'air', 'alone', 'amber', 'apart', 'ash', 'autumn', 'awake', 'away',
+            'bare', 'beneath', 'beyond', 'bitter', 'black', 'bleed', 'blind', 'bloom', 'blue', 'bone', 'bough', 'bound', 'breath', 'breeze', 'bright', 'broken', 'brown', 'burn',
+            'calm', 'candle', 'cedar', 'center', 'change', 'chime', 'clay', 'clear', 'close', 'cloud', 'cocoa', 'cold', 'color', 'come', 'copper', 'crown', 'cry',
+            'dance', 'dark', 'dawn', 'day', 'dead', 'dear', 'deep', 'desire', 'dew', 'dim', 'distant', 'door', 'down', 'dream', 'drift', 'drink', 'dry', 'dusk', 'dust',
+            'earth', 'ease', 'echo', 'edge', 'ember', 'empty', 'end', 'eternal', 'evening', 'ever', 'eye',
+            'face', 'fade', 'fall', 'far', 'fate', 'fear', 'feather', 'feel', 'fern', 'field', 'fire', 'flame', 'flesh', 'flight', 'float', 'floor', 'flow', 'flower', 'fog', 'fold', 'follow', 'forever', 'forget', 'fragile', 'free', 'frost',
+            'garden', 'gate', 'gather', 'gaze', 'gentle', 'ghost', 'glass', 'gleam', 'gloom', 'glow', 'gold', 'gone', 'grace', 'grain', 'grass', 'grave', 'gray', 'green', 'grief', 'ground', 'grow',
+            'hair', 'hand', 'harbor', 'haste', 'haze', 'head', 'hear', 'heart', 'hearth', 'heat', 'heaven', 'heavy', 'height', 'held', 'hidden', 'high', 'hill', 'hold', 'hollow', 'home', 'honey', 'hope', 'hour', 'house', 'hush',
+            'ice', 'idle', 'image', 'ink', 'inner', 'inside', 'iron', 'island',
+            'jade', 'jar', 'journey', 'joy', 'june',
+            'keep', 'key', 'kind', 'kiss', 'knee', 'knife', 'know',
+            'lace', 'lake', 'lament', 'lamp', 'land', 'lane', 'last', 'late', 'laugh', 'lay', 'leaf', 'lean', 'learn', 'leave', 'less', 'letter', 'lie', 'life', 'light', 'line', 'linen', 'linger', 'lip', 'listen', 'little', 'live', 'lone', 'long', 'look', 'loom', 'loose', 'lose', 'loss', 'lost', 'loud', 'love', 'low', 'lullaby',
+            'made', 'maiden', 'make', 'meadow', 'mean', 'measure', 'meet', 'melt', 'memory', 'mend', 'mercy', 'midnight', 'mild', 'mind', 'mine', 'mirror', 'mist', 'moment', 'moon', 'morning', 'moss', 'mother', 'mourn', 'mouth', 'move', 'murmur', 'muse', 'music', 'mute',
+            'name', 'narrow', 'near', 'neck', 'need', 'nest', 'never', 'new', 'night', 'noon', 'north', 'note', 'nothing', 'now',
+            'oak', 'ocean', 'ochre', 'old', 'olive', 'once', 'one', 'open', 'orange', 'orchard', 'other', 'out', 'over', 'own',
+            'page', 'pain', 'pale', 'palm', 'paper', 'parchment', 'part', 'pass', 'past', 'path', 'patience', 'pause', 'peace', 'pearl', 'petal', 'pine', 'place', 'plain', 'play', 'poem', 'poet', 'pollen', 'pool', 'poor', 'pour', 'prayer', 'press', 'pride', 'promise', 'pure',
+            'queen', 'quench', 'quiet',
+            'rain', 'raise', 'rare', 'reach', 'read', 'real', 'reason', 'red', 'reed', 'reflect', 'refuge', 'reign', 'release', 'remain', 'remember', 'rest', 'return', 'reverie', 'rhyme', 'rhythm', 'ribbon', 'rich', 'ride', 'ring', 'ripe', 'rise', 'river', 'road', 'roam', 'roar', 'root', 'rose', 'round', 'ruin', 'run', 'russet', 'rust',
+            'sad', 'safe', 'sage', 'sail', 'saint', 'salt', 'same', 'sand', 'save', 'say', 'scar', 'scatter', 'scent', 'sea', 'seal', 'search', 'season', 'secret', 'see', 'seed', 'seek', 'seem', 'self', 'send', 'sense', 'sepia', 'serene', 'shade', 'shadow', 'shake', 'shallow', 'shame', 'shape', 'share', 'sharp', 'shed', 'shell', 'shelter', 'shine', 'ship', 'shiver', 'shore', 'short', 'shoulder', 'show', 'shower', 'shroud', 'shut', 'sigh', 'sight', 'sign', 'silence', 'silent', 'silk', 'silver', 'simple', 'sin', 'sing', 'single', 'sink', 'sister', 'sit', 'sky', 'sleep', 'slender', 'slide', 'slow', 'slumber', 'small', 'smile', 'smoke', 'smooth', 'snow', 'soft', 'soil', 'solace', 'solemn', 'solitude', 'some', 'song', 'soon', 'sorrow', 'soul', 'sound', 'south', 'sow', 'space', 'spark', 'speak', 'speckled', 'spell', 'spend', 'spin', 'spirit', 'spoken', 'spring', 'stain', 'stair', 'stand', 'star', 'stare', 'start', 'stay', 'steep', 'stem', 'step', 'still', 'stone', 'stop', 'storm', 'story', 'strange', 'stray', 'stream', 'street', 'strength', 'stretch', 'string', 'strong', 'summer', 'sun', 'sunken', 'sunset', 'sweet', 'swell', 'swift', 'swim',
+            'table', 'take', 'tale', 'talk', 'tall', 'tangle', 'taste', 'tea', 'tear', 'tell', 'tender', 'there', 'thick', 'thin', 'thing', 'think', 'thirst', 'thorn', 'thought', 'thread', 'three', 'throat', 'through', 'throw', 'thunder', 'tide', 'tie', 'time', 'tired', 'toffee', 'together', 'told', 'tomorrow', 'tone', 'tongue', 'tonight', 'too', 'touch', 'toward', 'trace', 'trail', 'train', 'tree', 'tremble', 'true', 'trust', 'truth', 'tune', 'turn', 'twilight',
+            'umber', 'under', 'unfold', 'unknown', 'until', 'upon',
+            'vain', 'vale', 'valley', 'vanilla', 'vanish', 'veil', 'vein', 'velvet', 'verse', 'vessel', 'view', 'vine', 'violet', 'voice', 'void', 'vow',
+            'wait', 'wake', 'walk', 'wall', 'wander', 'wane', 'want', 'warm', 'warmth', 'wash', 'waste', 'watch', 'water', 'wave', 'way', 'weak', 'wear', 'weary', 'weather', 'weave', 'weep', 'weight', 'well', 'west', 'wet', 'wheat', 'wheel', 'where', 'whisper', 'white', 'whole', 'wide', 'wild', 'will', 'willow', 'wind', 'window', 'wine', 'wing', 'winter', 'wire', 'wise', 'wish', 'with', 'wither', 'within', 'without', 'woman', 'wonder', 'wood', 'wool', 'word', 'world', 'worn', 'wound', 'woven', 'wrap', 'write',
+            'year', 'yearn', 'yellow', 'yesterday', 'yet', 'yield', 'young', 'youth'
+        ];
+
+        /* ----------------------------------------------------------------------
+           3. STATE MANAGEMENT & LOCAL STORAGE
+           ---------------------------------------------------------------------- */
+        const STORAGE_KEY_POEMS = 'petal_and_verse_poems_v1';
+        const STORAGE_KEY_THEME = 'petal_and_verse_theme_v1';
+
+        let state = {
+            theme: 'toffee-rose',
+            selectedSpecimenId: 'toffee-rose',
+            activeTab: 'muse',
+            currentPoemId: null,
+            poems: [],
+            promptIndex: 0
+        };
+
+        const DEFAULT_SAMPLE_POEM = {
+            id: 'sample-toffee-rose',
+            title: 'Pressed Between October Pages',
+            specimenId: 'toffee-rose',
+            content: `Like a Toffee Rose pressed between forgotten pages,\nyou hold the sepia warmth of late afternoon,\ncaramel petals curled like quiet ages,\na whispered melody in a minor tune.\n\nNo frost can touch the linen where you lie,\nsteeped in the scent of cedar, tea, and rain—\na gentle keeping of a passerby,\nwhere every faded crease forgets its pain.`,
+            updatedAt: new Date().toISOString()
+        };
+
+        /* ----------------------------------------------------------------------
+           4. ACCURATE ENGLISH SYLLABLE COUNTER ENGINE
+           ---------------------------------------------------------------------- */
+        function countWordSyllables(rawWord) {
+            const word = rawWord.toLowerCase().replace(/[^a-z']/g, '').replace(/^'+|'+$/g, '');
+            if (!word) return 0;
+            if (word.length <= 3) return 1;
+
+            // Common poetic contractions & special overrides
+            const overrides = {
+                'toffee': 2, 'cosmos': 2, 'cocoa': 2, 'poem': 2, 'poems': 2, 'poet': 2,
+                'quiet': 2, 'violet': 3, 'velvet': 2, 'vanilla': 3, 'sepia': 3,
+                'memory': 3, 'memories': 3, 'every': 2, 'evening': 2, 'heaven': 2,
+                'fire': 1, 'hour': 1, 'flower': 2, 'shower': 2, 'tower': 2,
+                'amber': 2, 'caramel': 3, 'linen': 2, 'autumn': 2, 'shadow': 2,
+                'silence': 2, 'orchid': 2, 'hazel': 2, 'bronze': 1, 'leaves': 1,
+                'breathe': 1, 'through': 1, 'though': 1, 'thought': 1, 'eye': 1, 'eyes': 1
+            };
+            if (overrides[word]) return overrides[word];
+
+            let processed = word
+                .replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '')
+                .replace(/^y/, '');
+
+            const vowelGroups = processed.match(/[aeiouy]{1,2}/g);
+            let count = vowelGroups ? vowelGroups.length : 1;
+
+            // Adjust for common poetic diphthongs/triphthongs
+            if (/(?:ia|io|eo|ua|uo)/.test(processed) && !/(?:tion|sion)/.test(word)) {
+                count += 1;
+            }
+            if (/(?:tion|sion)$/.test(word)) {
+                // Already counted as 1 vowel group, usually accurate
+            }
+            if (/le$/.test(word) && word.length > 2 && !/[aeiouy]le$/.test(word)) {
+                count += 1;
+            }
+
+            return Math.max(1, count);
+        }
+
+        function countLineSyllables(lineText) {
+            const words = lineText.trim().split(/\s+/).filter(Boolean);
+            if (words.length === 0) return 0;
+            return words.reduce((sum, w) => sum + countWordSyllables(w), 0);
+        }
+
+        /* ----------------------------------------------------------------------
+           5. SYNCHRONIZED EDITOR METRICS & PER-LINE SYLLABLE GUTTER
+           ---------------------------------------------------------------------- */
+        function updateEditorMetrics() {
+            const textarea = document.getElementById('poemTextarea');
+            const gutter = document.getElementById('syllableGutter');
+            const mirror = document.getElementById('mirrorMeasurer');
+            const text = textarea.value;
+
+            // Auto-expand textarea height cleanly
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.max(360, textarea.scrollHeight) + 'px';
+
+            // Split logical lines (hard returns)
+            const logicalLines = text.split('\n');
+            const computedStyle = window.getComputedStyle(textarea);
+            const lineHeightPx = parseFloat(computedStyle.lineHeight) || 34;
+
+            // Build gutter rows matched to exact wrapped visual height of each logical line
+            let gutterHtml = '';
+            let totalSyllables = 0;
+            let nonEmptyLineCount = 0;
+
+            logicalLines.forEach((line) => {
+                const syl = countLineSyllables(line);
+                totalSyllables += syl;
+                if (line.trim().length > 0) nonEmptyLineCount++;
+
+                // Measure visual height of this specific logical line inside the mirror
+                mirror.textContent = line.length > 0 ? line : ' ';
+                const visualHeight = Math.max(lineHeightPx, mirror.offsetHeight);
+
+                gutterHtml += `<div style="height: ${visualHeight}px; line-height: ${lineHeightPx}px;" class="transition-opacity ${syl === 0 ? 'opacity-25' : 'opacity-85 font-medium'}">${syl > 0 ? syl : '·'}</div>`;
+            });
+
+            gutter.innerHTML = gutterHtml;
+
+            // Calculate Stanzas & Words
+            const stanzas = text.trim().length === 0
+                ? 0
+                : text.trim().split(/\n\s*\n/).filter(s => s.trim().length > 0).length;
+
+            const words = text.trim().length === 0
+                ? 0
+                : text.trim().split(/\s+/).filter(Boolean).length;
+
+            document.getElementById('statLines').textContent = nonEmptyLineCount;
+            document.getElementById('statStanzas').textContent = stanzas;
+            document.getElementById('statWords').textContent = words;
+            document.getElementById('statSyllables').textContent = totalSyllables;
+        }
+
+        /* ----------------------------------------------------------------------
+           6. THEME SWITCHING (TOFFEE ROSE <-> COCOA COSMOS)
+           ---------------------------------------------------------------------- */
+        function setTheme(themeName) {
+            state.theme = themeName;
+            if (themeName === 'cocoa-cosmos') {
+                document.documentElement.setAttribute('data-theme', 'cocoa-cosmos');
+                document.getElementById('themeSubtitle').textContent = 'Cocoa Cosmos Edition';
+                document.getElementById('btnThemeCocoa').style.backgroundColor = 'var(--bg-paper)';
+                document.getElementById('btnThemeCocoa').style.color = 'var(--accent-primary)';
+                document.getElementById('btnThemeCocoa').style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
+                document.getElementById('btnThemeToffee').style.backgroundColor = 'transparent';
+                document.getElementById('btnThemeToffee').style.color = 'var(--text-secondary)';
+                document.getElementById('btnThemeToffee').style.boxShadow = 'none';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.getElementById('themeSubtitle').textContent = 'Toffee Rose Edition';
+                document.getElementById('btnThemeToffee').style.backgroundColor = 'var(--bg-paper)';
+                document.getElementById('btnThemeToffee').style.color = 'var(--accent-primary)';
+                document.getElementById('btnThemeToffee').style.boxShadow = '0 1px 4px rgba(45,30,23,0.1)';
+                document.getElementById('btnThemeCocoa').style.backgroundColor = 'transparent';
+                document.getElementById('btnThemeCocoa').style.color = 'var(--text-secondary)';
+                document.getElementById('btnThemeCocoa').style.boxShadow = 'none';
+            }
+            try {
+                localStorage.setItem(STORAGE_KEY_THEME, themeName);
+            } catch (e) {}
+        }
+
+        /* ----------------------------------------------------------------------
+           7. BOTANICAL MUSE RENDERING & TEXT INSERTION
+           ---------------------------------------------------------------------- */
+        function renderBotanicalMuse() {
+            const specimen = BOTANICAL_SPECIMENS.find(s => s.id === state.selectedSpecimenId) || BOTANICAL_SPECIMENS[0];
+
+            // Render Specimen Pills
+            const pillsContainer = document.getElementById('botanicalPills');
+            pillsContainer.innerHTML = BOTANICAL_SPECIMENS.map(s => {
+                const isSelected = s.id === specimen.id;
+                return `
+                    <button onclick="selectBotanicalSpecimen('${s.id}')"
+                            style="background-color: ${isSelected ? 'var(--accent-primary)' : 'var(--bg-paper)'}; 
+                                   color: ${isSelected ? '#FFFDF9' : 'var(--text-secondary)'};
+                                   border-color: ${isSelected ? 'var(--accent-primary)' : 'var(--border-subtle)'};"
+                            class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer">
+                        ${s.name}
+                    </button>
+                `;
+            }).join('');
+
+            // Render Flower Details
+            document.getElementById('museFlowerName').textContent = specimen.name;
+            document.getElementById('museFlowerColorDot').style.backgroundColor = specimen.color;
+            document.getElementById('museFlowerLore').textContent = specimen.lore;
+            document.getElementById('activeBotanicalBadge').textContent = specimen.tagline;
+
+            // Render Opening Lines
+            const openingsContainer = document.getElementById('openingLinesList');
+            openingsContainer.innerHTML = specimen.openings.map(line => `
+                <button onclick="insertOpeningLine('${line.replace(/'/g, "\\'")}')"
+                        style="background-color: var(--bg-paper); border-color: var(--border-subtle); color: var(--text-primary);"
+                        class="w-full text-left p-3 rounded-xl border hover:border-[#9E5A4C] transition group flex items-start justify-between gap-2 cursor-pointer">
+                    <span class="font-serif italic text-sm leading-snug">"${line}"</span>
+                    <span style="color: var(--accent-primary);" class="text-xs opacity-60 group-hover:opacity-100 shrink-0 font-sans font-medium">+ Use</span>
+                </button>
+            `).join('');
+
+            // Render Sensory Imagery Chips
+            const sensoryContainer = document.getElementById('sensoryWordsList');
+            sensoryContainer.innerHTML = specimen.sensory.map(word => `
+                <button onclick="insertWordAtCursor('${word}')"
+                        style="background-color: var(--bg-paper); border-color: var(--border-subtle); color: var(--text-secondary);"
+                        class="px-2.5 py-1 rounded-full border text-xs hover:border-[#9E5A4C] transition cursor-pointer">
+                    ${word}
+                </button>
+            `).join('');
+
+            // Render Prompt
+            const promptText = specimen.prompts[state.promptIndex % specimen.prompts.length];
+            document.getElementById('musePromptText').textContent = promptText;
+        }
+
+        function selectBotanicalSpecimen(id) {
+            state.selectedSpecimenId = id;
+            state.promptIndex = 0;
+            renderBotanicalMuse();
+        }
+
+        function shuffleMuse() {
+            const currentIdx = BOTANICAL_SPECIMENS.findIndex(s => s.id === state.selectedSpecimenId);
+            const nextIdx = (currentIdx + 1) % BOTANICAL_SPECIMENS.length;
+            state.selectedSpecimenId = BOTANICAL_SPECIMENS[nextIdx].id;
+            state.promptIndex += 1;
+            renderBotanicalMuse();
+            showToast(`Inspired by ${BOTANICAL_SPECIMENS[nextIdx].name}`);
+        }
+
+        function insertOpeningLine(line) {
+            const textarea = document.getElementById('poemTextarea');
+            const current = textarea.value;
+            if (current.trim().length === 0) {
+                textarea.value = line + '\n';
+            } else {
+                const needsNewline = !current.endsWith('\n');
+                textarea.value = current + (needsNewline ? '\n' : '') + line + '\n';
+            }
+            textarea.focus();
+            updateEditorMetrics();
+            triggerAutoSave();
+            showToast('Opening line woven into your verse');
+        }
+
+        function insertWordAtCursor(word) {
+            const textarea = document.getElementById('poemTextarea');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            const needsLeadingSpace = before.length > 0 && !/[\s\n]$/.test(before);
+            const insertion = (needsLeadingSpace ? ' ' : '') + word;
+
+            textarea.value = before + insertion + after;
+            const newCursor = start + insertion.length;
+            textarea.setSelectionRange(newCursor, newCursor);
+            textarea.focus();
+            updateEditorMetrics();
+            triggerAutoSave();
+            showToast(`Inserted "${word}"`);
+        }
+
+        /* ----------------------------------------------------------------------
+           8. RHYME & RHYTHM LOOKUP ENGINE
+           ---------------------------------------------------------------------- */
+        function lookupRhymeWord(rawQuery) {
+            const input = document.getElementById('rhymeInput');
+            const clearBtn = document.getElementById('btnClearRhyme');
+            const word = (rawQuery !== undefined ? rawQuery : input.value).trim().toLowerCase().replace(/[^a-z]/g, '');
+
+            if (rawQuery !== undefined) {
+                input.value = rawQuery;
+            }
+            clearBtn.classList.toggle('hidden', input.value.length === 0);
+
+            const targetWord = word || 'rose';
+            const sylCount = countWordSyllables(targetWord);
+            document.getElementById('analyzedWordDisplay').textContent = targetWord;
+            document.getElementById('analyzedSyllableBreak').textContent = `${sylCount} ${sylCount === 1 ? 'syllable' : 'syllables'}`;
+
+            let perfect = [];
+            let slant = [];
+            let synonyms = [];
+
+            if (POETIC_LEXICON[targetWord]) {
+                perfect = POETIC_LEXICON[targetWord].perfect;
+                slant = POETIC_LEXICON[targetWord].slant;
+                synonyms = POETIC_LEXICON[targetWord].synonyms;
+            } else {
+                // Algorithmic Phonetic Suffix & Assonance Matcher
+                const suffix3 = targetWord.slice(-3);
+                const suffix2 = targetWord.slice(-2);
+                const lastVowelMatch = targetWord.match(/[aeiouy]+[^aeiouy]*$/);
+                const rimeEnding = lastVowelMatch ? lastVowelMatch[0] : suffix2;
+
+                perfect = PHONETIC_WORD_BANK.filter(w =>
+                    w !== targetWord && (w.endsWith(rimeEnding) || (suffix3.length === 3 && w.endsWith(suffix3)))
+                ).slice(0, 12);
+
+                slant = PHONETIC_WORD_BANK.filter(w =>
+                    w !== targetWord && !perfect.includes(w) && w.endsWith(suffix2)
+                ).slice(0, 10);
+
+                // Poetic imagery fallbacks
+                synonyms = ['whisper', 'shadow', 'petal', 'ember', 'velvet', 'linen', 'twilight', 'reverie'];
+            }
+
+            renderWordChips('perfectRhymesList', perfect.length ? perfect : ['No exact match — try a root word']);
+            renderWordChips('slantRhymesList', slant.length ? slant : ['soft', 'dusk', 'echo', 'still']);
+            renderWordChips('poeticSynonymsList', synonyms);
+        }
+
+        function renderWordChips(containerId, words) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = words.map(w => {
+                const isPlaceholder = w.includes(' ');
+                if (isPlaceholder) {
+                    return `<span class="text-xs italic" style="color: var(--text-muted);">${w}</span>`;
+                }
+                return `
+                    <button onclick="insertWordAtCursor('${w}')"
+                            style="background-color: var(--bg-paper); border-color: var(--border-subtle); color: var(--text-primary);"
+                            class="px-2.5 py-1 rounded-lg border text-xs font-serif hover:border-[#9E5A4C] transition cursor-pointer">
+                        ${w}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function clearRhymeSearch() {
+            document.getElementById('rhymeInput').value = '';
+            lookupRhymeWord('rose');
+        }
+
+        /* ----------------------------------------------------------------------
+           9. NOTEBOOK & LOCAL STORAGE PERSISTENCE
+           ---------------------------------------------------------------------- */
+        function loadPoemsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_POEMS);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        state.poems = parsed;
+                        return;
+                    }
+                }
+            } catch (e) {}
+            state.poems = [DEFAULT_SAMPLE_POEM];
+            persistPoemsToStorage();
+        }
+
+        function persistPoemsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY_POEMS, JSON.stringify(state.poems));
+            } catch (e) {}
+            document.getElementById('notebookCountBadge').textContent = state.poems.length;
+        }
+
+        function loadPoemIntoEditor(poemId) {
+            const poem = state.poems.find(p => p.id === poemId) || state.poems[0];
+            if (!poem) return;
+
+            state.currentPoemId = poem.id;
+            document.getElementById('poemTitle').value = poem.title || '';
+            document.getElementById('poemTextarea').value = poem.content || '';
+            if (poem.specimenId) {
+                state.selectedSpecimenId = poem.specimenId;
+                renderBotanicalMuse();
+            }
+            updateEditorMetrics();
+            renderNotebookList();
+        }
+
+        function createNewPoem() {
+            const newId = 'poem-' + Date.now();
+            const newPoem = {
+                id: newId,
+                title: '',
+                specimenId: state.selectedSpecimenId,
+                content: '',
+                updatedAt: new Date().toISOString()
+            };
+            state.poems.unshift(newPoem);
+            state.currentPoemId = newId;
+            persistPoemsToStorage();
+            loadPoemIntoEditor(newId);
+            document.getElementById('poemTitle').focus();
+            showToast('Opened a fresh parchment sheet');
+        }
+
+        let autoSaveTimer = null;
+        function triggerAutoSave() {
+            const statusText = document.getElementById('saveStatusText');
+            const statusDot = document.getElementById('saveStatusDot');
+            statusText.textContent = 'Writing...';
+            statusDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveCurrentPoem(false);
+            }, 650);
+        }
+
+        function saveCurrentPoem(notifyUser = false) {
+            const title = document.getElementById('poemTitle').value.trim();
+            const content = document.getElementById('poemTextarea').value;
+
+            let poem = state.poems.find(p => p.id === state.currentPoemId);
+            if (!poem) {
+                poem = {
+                    id: 'poem-' + Date.now(),
+                    title: title,
+                    content: content,
+                    specimenId: state.selectedSpecimenId,
+                    updatedAt: new Date().toISOString()
+                };
+                state.poems.unshift(poem);
+                state.currentPoemId = poem.id;
+            } else {
+                poem.title = title;
+                poem.content = content;
+                poem.specimenId = state.selectedSpecimenId;
+                poem.updatedAt = new Date().toISOString();
+            }
+
+            persistPoemsToStorage();
+            renderNotebookList();
+
+            document.getElementById('saveStatusText').textContent = 'Saved in notebook';
+            document.getElementById('saveStatusDot').className = 'w-2 h-2 rounded-full bg-emerald-500/80';
+
+            if (notifyUser) {
+                showToast('Poem pressed & saved to your notebook');
+            }
+        }
+
+        function deletePoemById(event, poemId) {
+            event.stopPropagation();
+            if (state.poems.length <= 1) {
+                // Clear the single remaining poem instead of leaving empty array
+                state.poems[0].title = '';
+                state.poems[0].content = '';
+                state.poems[0].updatedAt = new Date().toISOString();
+                persistPoemsToStorage();
+                loadPoemIntoEditor(state.poems[0].id);
+                showToast('Cleared current page');
+                return;
+            }
+            state.poems = state.poems.filter(p => p.id !== poemId);
+            persistPoemsToStorage();
+            if (state.currentPoemId === poemId) {
+                loadPoemIntoEditor(state.poems[0].id);
+            } else {
+                renderNotebookList();
+            }
+            showToast('Draft removed from notebook');
+        }
+
+        function renderNotebookList() {
+            const listContainer = document.getElementById('savedPoemsList');
+            listContainer.innerHTML = state.poems.map(p => {
+                const isActive = p.id === state.currentPoemId;
+                const displayTitle = p.title && p.title.trim().length > 0 ? p.title : 'Untitled Verse';
+                const excerpt = p.content && p.content.trim().length > 0
+                    ? p.content.trim().split('\n')[0].slice(0, 56) + (p.content.length > 56 ? '...' : '')
+                    : 'Empty parchment page...';
+                const dateStr = new Date(p.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+                return `
+                    <div onclick="loadPoemIntoEditor('${p.id}')"
+                         style="background-color: var(--bg-paper); 
+                                border-color: ${isActive ? 'var(--accent-primary)' : 'var(--border-subtle)'};"
+                         class="p-3.5 rounded-xl border transition cursor-pointer group relative">
+                        <div class="flex items-start justify-between gap-2">
+                            <h4 class="font-serif text-base font-semibold truncate" style="color: var(--text-primary);">
+                                ${escapeHtml(displayTitle)}
+                            </h4>
+                            <button onclick="deletePoemById(event, '${p.id}')"
+                                    style="color: var(--text-muted);"
+                                    class="opacity-60 hover:opacity-100 hover:text-red-500 text-xs px-1.5 py-0.5 rounded transition cursor-pointer"
+                                    title="Delete draft">
+                                ✕
+                            </button>
+                        </div>
+                        <p class="text-xs font-serif italic truncate mt-1" style="color: var(--text-secondary);">
+                            ${escapeHtml(excerpt)}
+                        </p>
+                        <div class="flex items-center justify-between mt-2 text-[10px]" style="color: var(--text-muted);">
+                            <span>${dateStr}</span>
+                            ${isActive ? `<span style="color: var(--accent-primary);" class="font-semibold">Editing</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ----------------------------------------------------------------------
+           10. STUDIO TABS, MOBILE DRAWER, EXPORT & KEEPSAKE CARD MODAL
+           ---------------------------------------------------------------------- */
+        function switchStudioTab(tabName) {
+            state.activeTab = tabName;
+            const tabs = ['muse', 'rhyme', 'notebook'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+                const panel = document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (t === tabName) {
+                    btn.style.backgroundColor = 'var(--bg-paper)';
+                    btn.style.color = 'var(--accent-primary)';
+                    btn.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.color = 'var(--text-secondary)';
+                    btn.style.boxShadow = 'none';
+                    panel.classList.add('hidden');
+                }
+            });
+        }
+
+        function toggleMobileDrawer() {
+            const sidebar = document.getElementById('studioSidebar');
+            const backdrop = document.getElementById('drawerBackdrop');
+            const isClosed = sidebar.classList.contains('translate-x-full');
+
+            if (isClosed) {
+                sidebar.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function copyPoemToClipboard() {
+            const title = document.getElementById('poemTitle').value.trim();
+            const body = document.getElementById('poemTextarea').value.trim();
+            const formatted = (title ? title + '\n\n' : '') + body;
+
+            if (!formatted) {
+                showToast('Write a line or two before copying');
+                return;
+            }
+
+            // Use execCommand fallback for reliable iframe clipboard support
+            const temp = document.createElement('textarea');
+            temp.value = formatted;
+            temp.style.position = 'fixed';
+            temp.style.opacity = '0';
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand('copy');
+                showToast('Formatted poem copied to clipboard');
+            } catch (err) {
+                showToast('Unable to copy automatically');
+            }
+            document.body.removeChild(temp);
+        }
+
+        function downloadPoemTxt() {
+            const title = document.getElementById('poemTitle').value.trim() || 'Untitled Verse';
+            const body = document.getElementById('poemTextarea').value;
+            const fullText = `${title}\n${'—'.repeat(Math.min(title.length, 32))}\n\n${body}\n\n— Composed in Petal & Verse`;
+
+            const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'poem'}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Downloaded poem as .txt');
+        }
+
+        function openPreviewModal() {
+            const title = document.getElementById('poemTitle').value.trim() || 'Untitled Verse';
+            const body = document.getElementById('poemTextarea').value.trim() || 'Your stanza will rest here like a pressed flower...';
+            const lines = document.getElementById('statLines').textContent;
+            const syllables = document.getElementById('statSyllables').textContent;
+
+            document.getElementById('cardPoemTitle').textContent = title;
+            document.getElementById('cardPoemBody').textContent = body;
+            document.getElementById('cardEditionLabel').textContent =
+                state.theme === 'cocoa-cosmos' ? 'Cocoa Cosmos Nocturne Press' : 'Toffee Rose Botanical Press';
+            document.getElementById('cardDateStamp').textContent =
+                new Date().toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+            document.getElementById('cardMetricsStamp').textContent = `${lines} lines · ${syllables} syllables`;
+
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.style.backgroundColor = 'var(--text-primary)';
+            toast.style.color = 'var(--bg-paper)';
+            toast.className = 'toast-animate px-4 py-2.5 rounded-full text-xs font-medium shadow-lg whitespace-nowrap';
+            toast.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(toast);
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /* ----------------------------------------------------------------------
+           11. INITIALIZATION ON WINDOW LOAD
+           ---------------------------------------------------------------------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            // Restore Theme
+            let savedTheme = 'toffee-rose';
+            try {
+                savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'toffee-rose';
+            } catch (e) {}
+            setTheme(savedTheme);
+
+            // Initialize Muse, Rhyme Lookup & Saved Notebook
+            renderBotanicalMuse();
+            lookupRhymeWord('rose');
+            switchStudioTab('muse');
+            loadPoemsFromStorage();
+            loadPoemIntoEditor(state.poems[0].id);
+
+            // Attach Live Editor Event Listeners
+            const textarea = document.getElementById('poemTextarea');
+            const titleInput = document.getElementById('poemTitle');
+            const rhymeInput = document.getElementById('rhymeInput');
+
+            textarea.addEventListener('input', () => {
+                updateEditorMetrics();
+                triggerAutoSave();
+            });
+
+            titleInput.addEventListener('input', () => {
+                triggerAutoSave();
+            });
+
+            rhymeInput.addEventListener('input', (e) => {
+                lookupRhymeWord(e.target.value);
+            });
+
+            // Re-sync syllable gutter on window resize
+            window.addEventListener('resize', updateEditorMetrics);
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closePreviewModal();
+            });
+        });
+    </script>
+</body>
+</html>

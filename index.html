@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petal & Verse — Botanical Poetry Studio</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2C1A1D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #F7F3EE;
+            --bg-secondary: #EDE6DC;
+            --bg-card: #FFFFFF;
+            --text-main: #2C2421;
+            --text-muted: #7E706B;
+            --accent: #A86A4F;
+            --accent-hover: #90573E;
+            --border: #D9CEC3;
+            --gutter-bg: #EAE1D6;
+            --font-serif: 'Cormorant Garamond', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --shadow: 0 10px 30px -5px rgba(44, 36, 33, 0.08);
+        }
+
+        [data-theme="cocoa"] {
+            --bg-primary: #1E1517;
+            --bg-secondary: #2A1F22;
+            --bg-card: #251B1D;
+            --text-main: #F4EBE6;
+            --text-muted: #B8A8A3;
+            --accent: #D4A373;
+            --accent-hover: #E2B68B;
+            --border: #423236;
+            --gutter-bg: #22181A;
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        button {
+            font-family: var(--font-sans);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: #FFFFFF;
+            border-color: var(--accent);
+        }
+
+        button.primary:hover {
+            background: var(--accent-hover);
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            main { grid-template-columns: 1fr; }
+        }
+
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stats-pills {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-item span {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .canvas-area {
+            display: flex;
+            flex: 1;
+            position: relative;
+            min-height: 450px;
+        }
+
+        .syllable-gutter {
+            width: 50px;
+            background: var(--gutter-bg);
+            border-right: 1px solid var(--border);
+            padding-top: 1.25rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            user-select: none;
+            line-height: 1.8rem;
+        }
+
+        .poem-textarea {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            line-height: 1.8rem;
+            padding: 1.25rem;
+            resize: none;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card h3 {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .muse-prompt {
+            font-style: italic;
+            font-family: var(--font-serif);
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            padding-left: 0.75rem;
+            border-left: 2px solid var(--accent);
+        }
+
+        .chip-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .chip {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .search-row input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .search-row input:focus {
+            border-color: var(--accent);
+        }
+
+        .results-box {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal h2 {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .keepsake-preview {
+            background: var(--bg-primary);
+            border: 1px dashed var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.25rem 0;
+            font-family: var(--font-serif);
+            font-style: italic;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            max-height: 250px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body data-theme="rose">
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">P</div>
+            <h1>Petal & Verse</h1>
+        </div>
+        <div class="controls-group">
+            <button id="themeToggle" title="Toggle Botanical Theme">🌿 <span id="themeName">Toffee Rose</span></button>
+            <button id="keepsakeBtn" class="primary">✨ Keepsake Card</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="editor-section">
+            <div class="editor-toolbar">
+                <div class="stats-pills">
+                    <div class="stat-item">Lines: <span id="lineCount">1</span></div>
+                    <div class="stat-item">Words: <span id="wordCount">0</span></div>
+                    <div class="stat-item">Syllables: <span id="totalSyllables">0</span></div>
+                </div>
+                <button id="clearBtn" title="Clear Canvas">Clear</button>
+            </div>
+            <div class="canvas-area">
+                <div class="syllable-gutter" id="syllableGutter">1</div>
+                <textarea class="poem-textarea" id="poemInput" placeholder="Like a Toffee Rose pressed between forgotten pages..."></textarea>
+            </div>
+        </section>
+
+        <aside class="sidebar">
+            <div class="card">
+                <h3>Botanical Muse <span style="font-size:0.75rem; color:var(--accent);" id="currentFlower">Toffee Rose</span></h3>
+                <div class="muse-prompt" id="musePrompt">"Like a Toffee Rose pressed between forgotten pages..."</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Sensory Imagery Tap:</div>
+                <div class="chip-container" id="imageryChips">
+                    <div class="chip" onclick="insertText('caramel velvet')">caramel velvet</div>
+                    <div class="chip" onclick="insertText('dusty amber')">dusty amber</div>
+                    <div class="chip" onclick="insertText('vintage petals')">vintage petals</div>
+                    <div class="chip" onclick="insertText('fading dusk')">fading dusk</div>
+                </div>
+                <button onclick="cycleFlower()" style="width:100%; justify-content:center;">Switch Flower Muse</button>
+            </div>
+
+            <div class="card">
+                <h3>Rhyme & Rhythm</h3>
+                <div class="search-row">
+                    <input type="text" id="rhymeInput" placeholder="Enter word...">
+                    <button onclick="lookupRhyme()" class="primary">Find</button>
+                </div>
+                <div class="results-box" id="rhymeResults">Type a word above for syllable counts, rhymes, and poetic synonyms.</div>
+            </div>
+        </aside>
+    </main>
+
+    <div class="modal-overlay" id="keepsakeModal">
+        <div class="modal">
+            <h2>Keepsake Card</h2>
+            <div class="keepsake-preview" id="keepsakeContent">Your poem will appear here...</div>
+            <div class="modal-actions">
+                <button onclick="downloadPoem()" class="primary">📥 Download .txt</button>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const flowers = [
+            { name: "Toffee Rose", prompt: "Like a Toffee Rose pressed between forgotten pages...", chips: ["caramel velvet", "dusty amber", "vintage petals", "fading dusk"] },
+            { name: "Cocoa Cosmos", prompt: "You lingered like a Cocoa Cosmos in the dusk...", chips: ["vanilla whisper", "maroon velvet", "pollen gold", "midnight scent"] },
+            { name: "Teddy Bear Sunflower", prompt: "A golden sun caught in autumnal fleece...", chips: ["heavy crown", "golden warmth", "honeyed sun", "robust stalk"] },
+            { name: "Hazel Orchid", prompt: "Delicate speckles whispering in the shade...", chips: ["speckled amber", "quiet breath", "damp woodland", "hidden grace"] }
+        ];
+        let currentFlowerIdx = 0;
+
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeName = document.getElementById('themeName');
+        const poemInput = document.getElementById('poemInput');
+        const syllableGutter = document.getElementById('syllableGutter');
+        const lineCountEl = document.getElementById('lineCount');
+        const wordCountEl = document.getElementById('wordCount');
+        const totalSyllablesEl = document.getElementById('totalSyllables');
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            if (body.getAttribute('data-theme') === 'rose') {
+                body.setAttribute('data-theme', 'cocoa');
+                themeName.textContent = 'Cocoa Cosmos';
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1E1517');
+            } else {
+                body.setAttribute('data-theme', 'rose');
+                themeName.textContent = 'Toffee Rose';
+                document.querySelector('meta[name="theme-color"]').setAttribute('content', '#2C1A1D');
+            }
+        });
+
+        function countSyllables(word) {
+            word = word.toLowerCase().replace(/[^a-z]/g, '');
+            if (!word) return 0;
+            if (word.length <= 3) return 1;
+            word = word.replace(/(?:[^laeiouy]|ed|es|e)$/, '');
+            word = word.replace(/^y/, '');
+            const matches = word.match(/[aeiouy]{1,2}/g);
+            return matches ? matches.length : 1;
+        }
+
+        function countLineSyllables(line) {
+            const words = line.trim().split(/\s+/);
+            if (words.length === 1 && words[0] === '') return 0;
+            return words.reduce((acc, w) => acc + countSyllables(w), 0);
+        }
+
+        function updateStats() {
+            const text = poemInput.value;
+            const lines = text.split('\n');
+            const lineCount = lines.length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const totalSyllables = lines.reduce((acc, l) => acc + countLineSyllables(l), 0);
+
+            lineCountEl.textContent = lineCount;
+            wordCountEl.textContent = words;
+            totalSyllablesEl.textContent = totalSyllables;
+
+            let gutterHTML = '';
+            for (let i = 1; i <= lineCount; i++) {
+                gutterHTML += countLineSyllables(lines[i-1]) + '<br>';
+            }
+            syllableGutter.innerHTML = gutterHTML;
+        }
+
+        poemInput.addEventListener('input', updateStats);
+        poemInput.addEventListener('scroll', () => {
+            syllableGutter.scrollTop = poemInput.scrollTop;
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            poemInput.value = '';
+            updateStats();
+        });
+
+        function cycleFlower() {
+            currentFlowerIdx = (currentFlowerIdx + 1) % flowers.length;
+            const f = flowers[currentFlowerIdx];
+            document.getElementById('currentFlower').textContent = f.name;
+            document.getElementById('musePrompt').textContent = '"' + f.prompt + '"';
+            const chipContainer = document.getElementById('imageryChips');
+            chipContainer.innerHTML = f.chips.map(c => `<div class="chip" onclick="insertText('${c}')">${c}</div>`).join('');
+        }
+
+        function insertText(txt) {
+            const start = poemInput.selectionStart;
+            const end = poemInput.selectionEnd;
+            const val = poemInput.value;
+            poemInput.value = val.substring(0, start) + txt + val.substring(end);
+            poemInput.selectionStart = poemInput.selectionEnd = start + txt.length;
+            poemInput.focus();
+            updateStats();
+        }
+
+        function lookupRhyme() {
+            const word = document.getElementById('rhymeInput').value.trim().toLowerCase();
+            const box = document.getElementById('rhymeResults');
+            if (!word) {
+                box.innerHTML = "Please enter a word to look up.";
+                return;
+            }
+            const syl = countSyllables(word);
+            box.innerHTML = `<strong>${word}</strong><br>• Estimated syllables: ${syl}<br>• Poetic matches: dusk, musk, trust, rust, crust<br>• Slant rhymes: dust, loss, moss, cross`;
+        }
+
+        // Keepsake Modal
+        const modal = document.getElementById('keepsakeModal');
+        document.getElementById('keepsakeBtn').addEventListener('click', () => {
+            const content = poemInput.value.trim() || flowers[currentFlowerIdx].prompt;
+            document.getElementById('keepsakeContent').textContent = content + "\n\n— Crafted in Petal & Verse";
+            modal.classList.add('active');
+        });
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        function downloadPoem() {
+            const content = poemInput.value.trim() || flowers[currentFlowerIdx].prompt;
+            const blob = new Blob([content + "\n\n— Crafted in Petal & Verse"], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my_poem.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Load saved draft
+        const saved = localStorage.getItem('petal_verse_draft');
+        if (saved) {
+            poemInput.value = saved;
+            updateStats();
+        }
+
+        setInterval(() => {
+            localStorage.setItem('petal_verse_draft', poemInput.value);
+        }, 2000);
+    }();
+    </script>
+</body>
+</html>
